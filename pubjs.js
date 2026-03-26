@@ -18,7 +18,7 @@
       	// 2. 配置参数
         const settings = {
             owner: 'zhuh49092',
-            repo: 'files',
+            repo: 'files/kmd',
             path: Date.now() + '_' + fileName, // 存储路径
             token: 'dEXcOV6Y0eyRnELD68zUtcHX74lknu31fi3c',
             branch: 'main',
