@@ -361,7 +361,12 @@ function startAnimation(animalCount) {
                     animators.forEach((anim, index) => {
                         const delay = 100 * (0.5 + Math.random());
                         setTimeout(() => {
-                            anim.animate();
+                            // 如果是下边，随机选择礼花效果
+                            if (anim.edge === 'bottom' && Math.random() > 0.5) {
+                                launchConfettiAnim(anim, availableNumbers);
+                            } else {
+                                anim.animate();
+                            }
                         }, delay); // 每个动物延迟时间（毫秒），产生连续效果
                     });
                 }
@@ -376,6 +381,97 @@ function startAnimation(animalCount) {
                     anim.animate();
                 });
             }
+        };
+    }
+}
+
+function launchConfettiAnim(mainAnim, availableNumbers) {
+    const confettiCount = GetRnd(5, 8);
+    const imgWidth = mainAnim.element.width();
+    const imgHeight = mainAnim.element.height();
+    const scale = 0.7;
+    
+    for (let i = 0; i < confettiCount; i++) {
+        const imgindex = availableNumbers.splice(GetRnd(0, availableNumbers.length - 1), 1)[0];
+        const imageUrl = "zoo/A" + imgindex + ".png";
+        
+        const tempImg = new Image();
+        tempImg.src = imageUrl;
+        
+        tempImg.onload = function() {
+            const windowWidth = $(window).width();
+            const windowHeight = $(window).height();
+            
+            // 在屏幕中央区域随机分布，不要太分散
+            const centerX = windowWidth / 2;
+            const spread = windowWidth / 3;
+            const startX = centerX - spread / 2 + Math.random() * spread;
+            const startY = windowHeight + imgHeight * scale;
+            const peakHeight = windowHeight * (0.2 + Math.random() * 0.3);
+            
+            const direction = Math.random() > 0.5 ? 1 : -1;
+            const fallDistance = (windowWidth / 8) + Math.random() * (windowWidth / 8);
+            const targetX = startX + direction * fallDistance;
+            const targetY = windowHeight + imgHeight * scale;
+            
+            const element = $('<img>')
+                .addClass('animal-image')
+                .attr('src', imageUrl)
+                .attr('width', imgWidth * scale)
+                .attr('height', imgHeight * scale)
+                .css({
+                    position: 'absolute',
+                    left: startX,
+                    top: startY,
+                    zIndex: 1000,
+                    transform: `scale(${scale})`
+                })
+                .hide();
+            
+            $('#animationArea').append(element);
+            element.show();
+            
+            let startTime = null;
+            const riseDuration = mainAnim.getRandomDuration(600);
+            const fallDuration = mainAnim.getRandomDuration(1200);
+            const totalDuration = riseDuration + fallDuration;
+            
+            const animateConfetti = (timestamp) => {
+                if (!startTime) startTime = timestamp;
+                const elapsed = timestamp - startTime;
+                
+                if (elapsed < riseDuration) {
+                    const progress = elapsed / riseDuration;
+                    const currentY = startY - (startY - peakHeight) * progress;
+                    
+                    element.css({
+                        left: startX,
+                        top: currentY
+                    });
+                    
+                    requestAnimationFrame(animateConfetti);
+                } else if (elapsed < totalDuration) {
+                    const fallProgress = (elapsed - riseDuration) / fallDuration;
+                    
+                    const currentX = startX + (targetX - startX) * fallProgress;
+                    const currentY = peakHeight + (targetY - peakHeight) * fallProgress * fallProgress;
+                    
+                    element.css({
+                        left: currentX,
+                        top: currentY
+                    });
+                    
+                    requestAnimationFrame(animateConfetti);
+                } else {
+                    element.remove();
+                }
+            };
+            
+            requestAnimationFrame(animateConfetti);
+        };
+        
+        tempImg.onerror = function() {
+            console.error('图片加载失败:', imageUrl);
         };
     }
 }
