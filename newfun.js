@@ -86,110 +86,215 @@ $.easing.easeInCustom = function (x, t, b, c, d) {
 	        }
         }
         
+        // 计算目标位置（移入屏幕一半距离）
+        getTargetPosition() {
+            const $element = this.element;
+            const imgWidth = $element.width();
+            const imgHeight = $element.height();
+            const halfWidth = imgWidth / 2;
+            const halfHeight = imgHeight / 2;
+            const scrollTop = $(window).scrollTop();
+            const windowWidth = $(window).width();
+            const windowHeight = $(window).height();
+    
+            switch(this.edge) {
+                case 'top':
+                    return { top: scrollTop - halfHeight };
+                case 'right':
+                    return { left: windowWidth - halfWidth };
+                case 'bottom':
+                    return { top: scrollTop + windowHeight - halfHeight };
+                case 'left':
+                    return { left: -halfWidth };
+            }
+        }
+    
+        // 计算退出位置（回到屏幕外）
+        getExitPosition() {
+            const $element = this.element;
+            const imgWidth = $element.width();
+            const imgHeight = $element.height();
+            const scrollTop = $(window).scrollTop();
+            const scrollBottom = scrollTop + $(window).height();
+            const windowWidth = $(window).width();
+    
+            switch(this.edge) {
+                case 'top':
+                    return { top: `${scrollTop - imgHeight}px` };
+                case 'right':
+                    return { left: `${windowWidth + imgWidth}px` };
+                case 'bottom':
+                    return { top: `${scrollBottom}px` };
+                case 'left':
+                    return { left: `-${imgWidth}px` };
+            }
+        }
+        
+        // 生成随机时间（当前值的0.5倍到1.5倍）
+        getRandomDuration(baseDuration) {
+            return baseDuration * (0.5 + Math.random());
+        }
+        
         // 执行动画
         animate(callback) {
             this.element.show();
             this.setInitialPosition();
             
             if (this.edge === 'left' || this.edge === 'right') {
-                // 左侧或右侧：从屏幕上加速穿过
-                const windowWidth = $(window).width();
-                let imgWidth = this.element.width();
-                if (imgWidth === 0) imgWidth = 200;
+                // 左侧或右侧：随机选择运动方式
+                const animationType = Math.random() > 0.5 ? 'peek' : 'cross';
                 
-                const targetX = this.edge === 'left' ? windowWidth + imgWidth : -imgWidth * 2;
-                
-                this.element.animate({
-                    left: targetX
-                }, {
-                    duration: 3000, // 动画持续时间（毫秒）
-                    easing: 'easeInCustom',
-                    complete: () => {
-                        this.element.remove();
-                        if (callback) callback();
-                    }
-                });
-            } else if (this.edge === 'top') {
-                // 上边：自由落体而下
-                const windowHeight = $(window).height();
-                const imgHeight = this.element.height();
-                const targetY = windowHeight + imgHeight;
-                
-                this.element.animate({
-                    top: targetY
-                }, {
-                    duration: 1500, // 动画持续时间（毫秒）
-                    easing: 'swing',
-                    complete: () => {
-                        this.element.remove();
-                        if (callback) callback();
-                    }
-                });
-            } else if (this.edge === 'bottom') {
-                // 下方：礼花式弹出，先升起再分散落下
-                const windowHeight = $(window).height();
-                const imgHeight = this.element.height();
-                const windowWidth = $(window).width();
-                const imgWidth = this.element.width();
-                
-                // 从底部随机位置开始升起
-                const startX = Math.random() * (windowWidth - imgWidth);
-                const startY = windowHeight + imgHeight;
-                
-                // 升起到随机高度（屏幕高度的20%-50%）
-                const peakHeight = windowHeight * (0.2 + Math.random() * 0.3);
-                
-                // 随机选择向左或向右落下，以及落下的距离
-                const direction = Math.random() > 0.5 ? 1 : -1;
-                const fallDistance = (windowWidth / 4) + Math.random() * (windowWidth / 4);
-                const targetX = startX + direction * fallDistance;
-                const targetY = windowHeight + imgHeight; // 落到屏幕下方
-                
-                // 礼花动画：先升起再落下
-                let startTime = null;
-                const riseDuration = 600; // 升起阶段持续时间（毫秒）
-                const fallDuration = 1200; // 落下阶段持续时间（毫秒）
-                const totalDuration = riseDuration + fallDuration; // 总动画时间
-                
-                const animateFirework = (timestamp) => {
-                    if (!startTime) startTime = timestamp;
-                    const elapsed = timestamp - startTime;
+                if (animationType === 'peek') {
+                    // 探头缩回去
+                    const targetPos = this.getTargetPosition();
+                    const moveInDuration = this.getRandomDuration(500);
+                    const moveOutDuration = this.getRandomDuration(500);
+                    const stayDuration = this.getRandomDuration(500);
                     
-                    if (elapsed < riseDuration) {
-                        // 第一阶段：升起
-                        const progress = elapsed / riseDuration;
-                        const currentY = startY - (startY - peakHeight) * progress;
-                        
-                        this.element.css({
-                            left: startX,
-                            top: currentY,
-                            transform: `rotate(${progress * 180}deg)`
-                        });
-                        
-                        requestAnimationFrame(animateFirework);
-                    } else if (elapsed < totalDuration) {
-                        // 第二阶段：分散落下
-                        const fallProgress = (elapsed - riseDuration) / fallDuration;
-                        
-                        // 抛物线运动：x匀速，y加速
-                        const currentX = startX + (targetX - startX) * fallProgress;
-                        const currentY = peakHeight + (targetY - peakHeight) * fallProgress * fallProgress;
-                        
-                        this.element.css({
-                            left: currentX,
-                            top: currentY,
-                            transform: `rotate(${180 + fallProgress * 540}deg)`
-                        });
-                        
-                        requestAnimationFrame(animateFirework);
-                    } else {
-                        // 动画结束
-                        this.element.remove();
-                        if (callback) callback();
-                    }
-                };
+                    this.element.animate(targetPos, moveInDuration, 'swing', () => { // 移入时间（毫秒）
+                        setTimeout(() => {
+                            const exitPos = this.getExitPosition();
+                            this.element.animate(exitPos, moveOutDuration, 'swing', () => { // 移出时间（毫秒）
+                                this.element.remove();
+                                if (callback) callback();
+                            });
+                        }, stayDuration); // 停留时间（毫秒）
+                    });
+                } else {
+                    // 穿过屏幕
+                    const windowWidth = $(window).width();
+                    let imgWidth = this.element.width();
+                    if (imgWidth === 0) imgWidth = 200;
+                    
+                    const targetX = this.edge === 'left' ? windowWidth + imgWidth : -imgWidth * 2;
+                    const duration = this.getRandomDuration(3000);
+                    
+                    this.element.animate({
+                        left: targetX
+                    }, {
+                        duration: duration, // 动画持续时间（毫秒）
+                        easing: 'easeInCustom',
+                        complete: () => {
+                            this.element.remove();
+                            if (callback) callback();
+                        }
+                    });
+                }
+            } else if (this.edge === 'top') {
+                // 上边：随机选择运动方式
+                const animationType = Math.random() > 0.5 ? 'peek' : 'cross';
                 
-                requestAnimationFrame(animateFirework);
+                if (animationType === 'peek') {
+                    // 探头缩回去
+                    const targetPos = this.getTargetPosition();
+                    const moveInDuration = this.getRandomDuration(500);
+                    const moveOutDuration = this.getRandomDuration(500);
+                    const stayDuration = this.getRandomDuration(500);
+                    
+                    this.element.animate(targetPos, moveInDuration, 'swing', () => { // 移入时间（毫秒）
+                        setTimeout(() => {
+                            const exitPos = this.getExitPosition();
+                            this.element.animate(exitPos, moveOutDuration, 'swing', () => { // 移出时间（毫秒）
+                                this.element.remove();
+                                if (callback) callback();
+                            });
+                        }, stayDuration); // 停留时间（毫秒）
+                    });
+                } else {
+                    // 穿过屏幕（自由落体）
+                    const windowHeight = $(window).height();
+                    const imgHeight = this.element.height();
+                    const targetY = windowHeight + imgHeight;
+                    const duration = this.getRandomDuration(2500);
+                    
+                    this.element.animate({
+                        top: targetY
+                    }, {
+                        duration: duration, // 动画持续时间（毫秒）
+                        easing: 'swing',
+                        complete: () => {
+                            this.element.remove();
+                            if (callback) callback();
+                        }
+                    });
+                }
+            } else if (this.edge === 'bottom') {
+                // 下边：随机选择运动方式
+                const animationType = Math.random() > 0.5 ? 'peek' : 'bounce';
+                
+                if (animationType === 'peek') {
+                    // 探头缩回去
+                    const targetPos = this.getTargetPosition();
+                    const moveInDuration = this.getRandomDuration(500);
+                    const moveOutDuration = this.getRandomDuration(500);
+                    const stayDuration = this.getRandomDuration(500);
+                    
+                    this.element.animate(targetPos, moveInDuration, 'swing', () => { // 移入时间（毫秒）
+                        setTimeout(() => {
+                            const exitPos = this.getExitPosition();
+                            this.element.animate(exitPos, moveOutDuration, 'swing', () => { // 移出时间（毫秒）
+                                this.element.remove();
+                                if (callback) callback();
+                            });
+                        }, stayDuration); // 停留时间（毫秒）
+                    });
+                } else {
+                    // 弹起落下
+                    const windowHeight = $(window).height();
+                    const imgHeight = this.element.height();
+                    const windowWidth = $(window).width();
+                    const imgWidth = this.element.width();
+                    
+                    const startX = Math.random() * (windowWidth - imgWidth);
+                    const startY = windowHeight + imgHeight;
+                    const peakHeight = windowHeight * (0.2 + Math.random() * 0.3);
+                    
+                    const direction = Math.random() > 0.5 ? 1 : -1;
+                    const fallDistance = (windowWidth / 8) + Math.random() * (windowWidth / 8);
+                    const targetX = startX + direction * fallDistance;
+                    const targetY = windowHeight + imgHeight;
+                    
+                    let startTime = null;
+                    const riseDuration = this.getRandomDuration(600); // 升起阶段持续时间（毫秒）
+                    const fallDuration = this.getRandomDuration(1200); // 落下阶段持续时间（毫秒）
+                    const totalDuration = riseDuration + fallDuration; // 总动画时间
+                    
+                    const animateBounce = (timestamp) => {
+                        if (!startTime) startTime = timestamp;
+                        const elapsed = timestamp - startTime;
+                        
+                        if (elapsed < riseDuration) {
+                            // 第一阶段：升起
+                            const progress = elapsed / riseDuration;
+                            const currentY = startY - (startY - peakHeight) * progress;
+                            
+                            this.element.css({
+                                left: startX,
+                                top: currentY
+                            });
+                            
+                            requestAnimationFrame(animateBounce);
+                        } else if (elapsed < totalDuration) {
+                            // 第二阶段：分散落下
+                            const fallProgress = (elapsed - riseDuration) / fallDuration;
+                            
+                            const currentX = startX + (targetX - startX) * fallProgress;
+                            const currentY = peakHeight + (targetY - peakHeight) * fallProgress * fallProgress;
+                            
+                            this.element.css({
+                                left: currentX,
+                                top: currentY
+                            });
+                            
+                            requestAnimationFrame(animateBounce);
+                        } else {
+                            this.element.remove();
+                            if (callback) callback();
+                        }
+                    };
+                    
+                    requestAnimationFrame(animateBounce);
+                }
             }
         }
     }
@@ -200,19 +305,18 @@ const edges = ['top', 'right', 'bottom', 'left'];
 function getStartPosition(edge, imgSize) {
     const windowWidth = $(window).width();
     const windowHeight = $(window).height();
-    const scrollTop = $(window).scrollTop();
     
     switch(edge) {
         case 'top':
         case 'bottom':
             return {
                 coord: Math.random() * (windowWidth - imgSize),
-                offsetTop: edge === 'top' ? scrollTop : scrollTop + windowHeight - imgSize
+                offsetTop: edge === 'top' ? -imgSize : windowHeight
             };
         case 'left':
         case 'right':
             return {
-                coord: scrollTop + Math.random() * (windowHeight - imgSize),
+                coord: Math.random() * (windowHeight - imgSize),
                 offsetLeft: edge === 'left' ? 0 : windowWidth - imgSize
             };
     }
@@ -221,12 +325,8 @@ function getStartPosition(edge, imgSize) {
 function startAnimation(animalCount) {
     let selectedEdges = [];
     
-    if (animalCount === 1) {
+    for (let i = 0; i < animalCount; i++) {
         selectedEdges.push(edges[Math.floor(Math.random() * edges.length)]);
-    } else {
-        for (let i = 0; i < animalCount; i++) {
-            selectedEdges.push('bottom');
-        }
     }
     
     let loadedCount = 0;
@@ -259,13 +359,10 @@ function startAnimation(animalCount) {
                 
                 if (loadedCount === animalCount) {
                     animators.forEach((anim, index) => {
-                        if (animalCount > 1) {
-                            setTimeout(() => {
-                                anim.animate();
-                            }, index * 100); // 每个动物延迟100ms，产生礼花效果
-                        } else {
+                        const delay = 100 * (0.5 + Math.random());
+                        setTimeout(() => {
                             anim.animate();
-                        }
+                        }, delay); // 每个动物延迟时间（毫秒），产生连续效果
                     });
                 }
             });
