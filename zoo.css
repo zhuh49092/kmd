@@ -1,9 +1,12 @@
-﻿       body {
+       body {
             font-family: 'Inter', sans-serif;
             background: linear-gradient(135deg, #f0f4ff 0%, #faf0ff 100%);
             min-height: 100vh;
             background-image:url("img/back.avif");
             background-size:cover;
+            width: 100%;
+            max-width: 100%;
+            overflow-x: hidden;
         }
         .wback{           
         	  background-image:url("img/Daintree.png");
@@ -171,4 +174,15 @@ canvas {
 .animal-image {
     position: absolute;
     z-index: 100;
+}
+
+#animationArea {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 1000;
 }       
