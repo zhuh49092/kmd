@@ -39,7 +39,7 @@
 			                Welcome to KMD
 			            </h1>
 			            <p class="text-sm text-white max-w-2xl  text-left ">
-			                Enjoy today again, anytime—with your keyholder.
+			                Enjoy today again, anytime<br>—with your keyholder.
 			            </p>
             </div>       	
 
@@ -51,7 +51,7 @@
                         <div  class="w-10 h-10 rounded-full bg-gradient-to-r from-yellow-400 to-yellow-600 cursor-pointer hover:scale-110 hover:shadow-lg transition-transform duration-300 flex items-center justify-center text-white font-medium relative">
                             <i class="fas fa-edit"></i>
                         </div>
-                        <span class="tooltip">投稿</span>
+                        <span class="tooltip">post</span>
                     </div>
                     <div class="relative icon-container">
                         <div class="w-10 h-10 rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 cursor-pointer hover:scale-110 hover:shadow-lg transition-transform duration-300 flex items-center justify-center text-white font-medium relative">
@@ -89,7 +89,7 @@
 			  </div>   
 		      <div class="flex justify-center">
 		        <button type="submit" id="submitBtn" class="px-6 py-3 bg-green-600 text-white font-semibold rounded-lg shadow-md hover:bg-green-700 transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed" >
-		         投稿
+		         post
 		        </button>
 		      </div>
 		    </form>
@@ -104,7 +104,8 @@
                 id: 1,
                 type: 'image',
                 title: '',
-                content: '‼️‼️‼️要注意‼️‼️‼️　投稿の際は、ご本人や他の方のお顔が写らないようご配慮ください。',
+                content: '‼️‼️ Please note ‼️‼️
+When posting, please make sure that no faces—yours or others’—are visible.',
                 likes: 0,
                 comments: 0
             };
@@ -158,9 +159,9 @@
        	  	return;
        	  }         	
         	makeform([{type:'image',id:'imageFile',tip:'写真をアップロード'},
-        	{type:'text',id:'commitMessage',title:'話したいこと',tip:'今日の天気がいいね……'}
+        	{type:'text',id:'commitMessage',title:'What's on your mind?',tip:'Such a nice day today……'}
         	]);
-        	$('#submitBtn').html("投稿");
+        	$('#submitBtn').html("post");
         	$('#submitForm').off('submit');
   		    $('#submitForm').on('submit', function(e) {
 		        e.preventDefault();
@@ -173,7 +174,7 @@
 		        if (commitMessage=='')upjs++;
 		        if(upjs==2)
 		        {
-		         showResult('写真、もしくはメッセージを残してね', 'error');
+		         showResult('Leave a photo or a message!', 'error');
 		         return;	
 		        }	        
 		         $("#submitBtn").prop('disabled', true);
@@ -186,10 +187,10 @@
        	  	authorWin(2,_id);
        	  	return;
        	  }   	
-        	makeform([{type:'text',id:'commentConent',title:'貴重なコメントをお願いします',tip:'貴重なコメントをお願いします'},
+        	makeform([{type:'text',id:'commentConent',title:'Tell us what you think!',tip:'Tell us what you think!'},
         	{type:'hidden',id:'cardId',value:_id}
         	]);
-        	$('#submitBtn').html('コメントの送信');
+        	$('#submitBtn').html('Post comment');
         	$('#submitForm').off('submit'); 
  	        $('#submitForm').on('submit', function(e) {
 		        e.preventDefault();
@@ -198,7 +199,7 @@
 		        const _id=$("#cardId").val();
 		        const commentConent = $('#commentConent').val() || '';
 	          if (commentConent=='') {
-		          showResult('一言お願いします', 'error');
+		          showResult('Feel free to leave a message.', 'error');
 		          return;
 		        }			        
 		         $("#submitBtn").prop('disabled', true);
@@ -207,9 +208,9 @@
         	showModal("#modalOverlay"); 
         }       
         function authorWin(_type,_id){    	
-        	makeform([{type:'input',id:'author',title:'ニックネーム',tip:'はじめての投稿ですね。表示名を入力してください。'}
+        	makeform([{type:'input',id:'author',title:'nickname',tip:'First time posting? Please enter a display name.'}
         	]);
-        	$('#submitBtn').html('確定');
+        	$('#submitBtn').html('OK');
         	$('#submitForm').off('submit'); 
  	        $('#submitForm').on('submit', function(e) {
 		        e.preventDefault();
@@ -217,7 +218,7 @@
 		        $resultDiv.addClass('hidden');
 		        author=$("#author").val();	
 	          if (author=='') {
-		          showResult('表示名は必須です。', 'error');
+		          showResult('A display name is required.', 'error');
 		          return;
 		        }		        	        
 		         $("#submitBtn").prop('disabled', true);
