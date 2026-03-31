@@ -91,21 +91,19 @@ $.easing.easeInCustom = function (x, t, b, c, d) {
             const $element = this.element;
             const imgWidth = $element.width();
             const imgHeight = $element.height();
-            const halfWidth = imgWidth / 2;
-            const halfHeight = imgHeight / 2;
             const scrollTop = $(window).scrollTop();
             const windowWidth = $(window).width();
             const windowHeight = $(window).height();
     
             switch(this.edge) {
                 case 'top':
-                    return { top: scrollTop - halfHeight };
+                    return { top: scrollTop };
                 case 'right':
-                    return { left: windowWidth - halfWidth };
+                    return { left: windowWidth - imgWidth };
                 case 'bottom':
-                    return { top: scrollTop + windowHeight - halfHeight };
+                    return { top: scrollTop + windowHeight - imgHeight };
                 case 'left':
-                    return { left: -halfWidth };
+                    return { left: 0 };
             }
         }
     
