@@ -239,7 +239,7 @@
        async function PostComment(_id,commentConent){
  						try {
                   var data=await postData('comment',{rid:_id,comment:commentConent,entry_type:_entry,key_id:_key,name:author},function(data){
-					                  	showResult('评论成功', 'success');
+					                  	showResult('Comment posted successfully', 'success');
 											addLike_comm(_id,3);
 											var card=$('[data-id="'+_id+'"]');
 					            addComment(card,{name:author,cdate:getCurrentTimeString(),comment:commentConent});
@@ -361,7 +361,7 @@ if(!isFeatured){
     
     $('<span>', {
         class: 'text-gray-500 text-sm likec',
-        text: `${card.likes} 赞 · ${card.comments} 评论`
+        text: `${card.likes} Like · ${card.comments} Comment`
     }).appendTo($metaDiv);
     
     const $buttonDiv = $('<div>', { class: 'flex space-x-2' }).appendTo($metaDiv);
@@ -489,13 +489,13 @@ if(!isFeatured){
 		    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 		
 		    if (diffDays < 30) {
-		        return `${diffDays}天之前`;
+		        return `${diffDays} days ago`;
 		    } else if (diffDays < 365) {
 		        const diffMonths = Math.floor(diffDays / 30);
-		        return `${diffMonths}月之前`;
+		        return `${diffMonths} months ago`;
 		    } else {
 		        const diffYears = Math.floor(diffDays / 365);
-		        return `${diffYears}年之前`;
+		        return `${diffYears} years ago`;
 		    }
 		}
 		function getCurrentTimeString() {

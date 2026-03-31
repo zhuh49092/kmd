@@ -7,7 +7,7 @@ $(document).ready(function() {
      getParamFormUrl();
     // 初始化页面数据
     function initPageData() {
-        $('#detailTitle').text('夢見ヶ崎動物公園新聞スペース');
+        $('#detailTitle').text('Welcome to KMD');
         $('#detailContent').text(detailData.content);
         $('#detailImage').attr('src', detailData.picture);
         $('#commentCount').text(detailData.comments);
@@ -48,7 +48,7 @@ $(document).ready(function() {
        	  }        
         const commentText = $('#commentText').val().trim();
         if (commentText === '') {
-            $("#warninfo").show().html("请输入评论内容");
+            $("#warninfo").show().html("Please enter a comment");
             return;
         }
         
@@ -75,7 +75,7 @@ $(document).ready(function() {
 					        $('#commentsContainer').scrollTop(0);					        			                  	 	  
 			                  });                                                  
         } catch (error) {
-        	    $("#warninfo").show().html('评论提交失败：' + error.message);
+        	    $("#warninfo").show().html('Failed to post comment：' + error.message);
         }  
     }
         function authorWin(_type,e){    	
@@ -119,7 +119,7 @@ $(document).ready(function() {
 					        $('#likeCount').text(parseInt(oldlike)+1);				
 					        startAnimation(1);	        
             } catch (error) {
-                $("#warninfo").show().html('点赞失败：' + error.message);
+                $("#warninfo").show().html('Failed to like：' + error.message);
             } 	   	
     }
     function goBack() {
